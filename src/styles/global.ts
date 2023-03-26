@@ -70,6 +70,8 @@ export const GlobalStyle = createGlobalStyle`
   /* Define default focus */
   :is(:focus-visible) {
     outline: transparent;
-    box-shadow: 0 0 0 2px ${(props) => props.theme.colors.yellow[200]};
+    box-shadow: 0 0 0 2px ${(props) =>
+      props.theme.colors.gray[800]}, 0 0 0 4px ${(props) =>
+  props.theme.colors.yellow[200]};
   }
 `
