@@ -29,7 +29,7 @@ export const GlobalStyle = createGlobalStyle`
     5. Improve text rendering
   */
   body {
-    background-color: ${(props) => props.theme.colors.gray[900]};
+    background-color: ${(props) => props.theme.colors.gray[800]};
     color: ${(props) => props.theme.colors.gray[300]};
     font-family: ${(props) => props.theme.fontFamily.sans};
     line-height: 1.7;
@@ -68,8 +68,8 @@ export const GlobalStyle = createGlobalStyle`
 
   /* GLOBAL STYLES */
   /* Define default focus */
-  :is(:focus, :focus-visible) {
-    outline: 0;
+  :is(:focus-visible) {
+    outline: transparent;
     box-shadow: 0 0 0 2px ${(props) => props.theme.colors.yellow[200]};
   }
 `
