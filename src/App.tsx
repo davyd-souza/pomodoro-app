@@ -3,7 +3,7 @@ import { GlobalStyle } from './styles/global'
 
 export function App() {
   return (
-    <div className='App'>
+    <div className="App">
       <h1>Pomodoro</h1>
 
       <GlobalStyle />
