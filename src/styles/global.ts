@@ -74,4 +74,32 @@ export const GlobalStyle = createGlobalStyle`
       props.theme.colors.gray[800]}, 0 0 0 4px ${(props) =>
   props.theme.colors.yellow[200]};
   }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 0.5em;
+    height: 0.5em;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: transparent;
+    border-radius: 100vw;
+    margin-block: 0.5em;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: ${(props) => props.theme.colors.yellow[400]};
+    border-radius: 2px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: ${(props) => props.theme.colors.yellow[300]};
+  }
+
+  @supports (scrollbar-color: red blue) {
+    * {
+      scrollbar-color: ${(props) => props.theme.colors.yellow[400]} transparent;
+      scrollbar-width: thin;
+    }
+  }
 `
