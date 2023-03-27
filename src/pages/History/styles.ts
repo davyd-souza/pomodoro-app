@@ -2,7 +2,7 @@
 import styled from 'styled-components'
 
 export const HistoryContainer = styled.main`
-  min-width: min(50em, 100%);
+  min-width: min(60em, 100%);
   margin-inline: auto;
   padding-inline: 1rem;
   padding-block-end: 2rem;
