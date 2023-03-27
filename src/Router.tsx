@@ -1,7 +1,7 @@
 // DEPENDENCY
 import { Routes, Route } from 'react-router-dom'
 
-// DEPENDENCY
+// COMPONENT
 import { DefaultLayout } from './layouts/DefaultLayout'
 import { History } from './pages/History'
 import { Home } from './pages/Home'
