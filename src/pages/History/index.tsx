@@ -1,10 +1,13 @@
+// STYLE
+import { HistoryContainer, HistoryList, Status, TableBase } from './styles'
+
 export function History() {
   return (
-    <main>
+    <HistoryContainer>
       <h2>My history</h2>
 
-      <section>
-        <table>
+      <HistoryList>
+        <TableBase>
           <thead>
             <tr>
               <th>Task</th>
@@ -18,29 +21,37 @@ export function History() {
               <td>Task</td>
               <td>20 minutes</td>
               <td>2 months ago</td>
-              <td>Finished</td>
+              <td>
+                <Status statusColor="finished">Finished</Status>
+              </td>
             </tr>
             <tr>
               <td>Task</td>
               <td>20 minutes</td>
               <td>2 months ago</td>
-              <td>In Progress</td>
+              <td>
+                <Status statusColor="progress">In Progress</Status>
+              </td>
             </tr>
             <tr>
               <td>Task</td>
               <td>20 minutes</td>
               <td>2 months ago</td>
-              <td>topped</td>
+              <td>
+                <Status statusColor="stopped">Stopped</Status>
+              </td>
             </tr>
             <tr>
               <td>Task</td>
               <td>20 minutes</td>
               <td>2 months ago</td>
-              <td>Finished</td>
+              <td>
+                <Status statusColor="finished">Finished</Status>
+              </td>
             </tr>
           </tbody>
-        </table>
-      </section>
-    </main>
+        </TableBase>
+      </HistoryList>
+    </HistoryContainer>
   )
 }

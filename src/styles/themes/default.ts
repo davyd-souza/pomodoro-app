@@ -27,6 +27,10 @@ export const defaultTheme = {
     amber: {
       500: '#fba94c',
     },
+
+    green: {
+      500: '#00875F',
+    },
   },
   fontFamily: {
     sans: 'Roboto, sans-serif',
