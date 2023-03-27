@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 
 export const HomeContainer = styled.main`
-  min-width: min(50em, 100% - (0.5rem * 2));
+  min-width: min(50em, 100%);
   margin-inline: auto;
   padding-inline: 1rem;
 
