@@ -51,12 +51,18 @@ export function Home() {
   )
 
   useEffect(() => {
+    let intervalId: number
+
     if (activeCountdown) {
-      setInterval(() => {
+      intervalId = setInterval(() => {
         setAmountSecondsPassed((state) =>
           dayjs(new Date()).diff(activeCountdown.startDate, 'seconds'),
         )
       }, 1000)
+    }
+
+    return () => {
+      clearInterval(intervalId)
     }
   }, [activeCountdown])
 
@@ -72,6 +78,7 @@ export function Home() {
 
     setCountdowns((state) => [...state, newCountdown])
     setCountdownId(id)
+    setAmountSecondsPassed(0)
 
     // Will reset value to defaultValues inside of useForm hook
     reset()
