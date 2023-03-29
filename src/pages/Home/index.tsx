@@ -100,6 +100,13 @@ export function Home() {
   const minutes = String(minutesLeft).padStart(2, '0')
   const seconds = String(secondsLeft).padStart(2, '0')
 
+  // update page title with timer
+  useEffect(() => {
+    if (activeCountdown) {
+      document.title = `${minutes}:${seconds}`
+    }
+  }, [minutes, seconds, activeCountdown])
+
   return (
     <HomeContainer>
       <FormContainer
