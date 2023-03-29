@@ -7,14 +7,15 @@ import dayjs from 'dayjs'
 
 // STYLE
 import {
-  ButtonStyled,
+  StartButton,
   CountdownContainer,
   FormContainer,
   HomeContainer,
   InputStyled,
   Separator,
+  InterruptButton,
 } from './styles'
-import { Play } from 'phosphor-react'
+import { HandPalm, Play } from 'phosphor-react'
 
 const newCountdownFormValidationSchema = z.object({
   task: z.string().min(1, 'Please type your task'),
@@ -144,10 +145,17 @@ export function Home() {
         <span>{seconds[1]}</span>
       </CountdownContainer>
 
-      <ButtonStyled form="timer" type="submit" disabled={isSubmitDisabled}>
-        Start
-        <Play size={24} weight="bold" />
-      </ButtonStyled>
+      {activeCountdown ? (
+        <InterruptButton type="button">
+          Interrupt
+          <HandPalm size={24} weight="bold" />
+        </InterruptButton>
+      ) : (
+        <StartButton form="timer" type="submit" disabled={isSubmitDisabled}>
+          Start
+          <Play size={24} weight="bold" />
+        </StartButton>
+      )}
     </HomeContainer>
   )
 }

@@ -76,13 +76,10 @@ export const Separator = styled.div`
   color: ${(props) => props.theme.colors.yellow[400]};
 `
 
-export const ButtonStyled = styled.button`
+const BaseButton = styled.button`
   all: unset;
-
-  background-color: ${(props) => props.theme.colors.yellow[400]};
   border-radius: 8px;
 
-  color: ${(props) => props.theme.colors.gray[800]};
   font-weight: 700;
 
   display: inline-flex;
@@ -94,12 +91,26 @@ export const ButtonStyled = styled.button`
 
   cursor: pointer;
 
-  &:not(:disabled):is(:hover, :focus-visible) {
-    background-color: ${(props) => props.theme.colors.yellow[200]};
-  }
-
   &:disabled {
     opacity: 0.7;
     cursor: not-allowed;
+  }
+`
+
+export const StartButton = styled(BaseButton)`
+  color: ${(props) => props.theme.colors.gray[800]};
+  background-color: ${(props) => props.theme.colors.yellow[400]};
+
+  &:not(:disabled):is(:hover, :focus-visible) {
+    background-color: ${(props) => props.theme.colors.yellow[200]};
+  }
+`
+
+export const InterruptButton = styled(BaseButton)`
+  color: ${(props) => props.theme.colors.white};
+  background-color: ${(props) => props.theme.colors.red[500]};
+
+  &:not(:disabled):is(:hover, :focus-visible) {
+    background-color: ${(props) => props.theme.colors.red[700]};
   }
 `
