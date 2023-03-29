@@ -1,30 +1,18 @@
 // DEPENDENCY
-import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { createContext, useState } from 'react'
 import * as z from 'zod'
-import dayjs from 'dayjs'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { FormProvider, useForm } from 'react-hook-form'
+
+// COMPONENT
+import { NewCountdownForm } from './components/NewCountdownForm'
+import { Countdown } from './components/Countdown'
 
 // STYLE
-import {
-  StartButton,
-  CountdownContainer,
-  FormContainer,
-  HomeContainer,
-  InputStyled,
-  Separator,
-  InterruptButton,
-} from './styles'
+import { StartButton, HomeContainer, InterruptButton } from './styles'
 import { HandPalm, Play } from 'phosphor-react'
 
-const newCountdownFormValidationSchema = z.object({
-  task: z.string().min(1, 'Please type your task'),
-  minutesAmount: z.number().min(5).max(60),
-})
-
-type NewCycleFormData = z.infer<typeof newCountdownFormValidationSchema>
-
-interface Countdown {
+interface ICountdown {
   id: string
   task: string
   minutesAmount: number
@@ -33,12 +21,34 @@ interface Countdown {
   finishedDate?: Date
 }
 
+interface ICountdownContext {
+  activeCountdown: ICountdown | undefined
+  activeCountdownId: string | null
+  amountSecondsPassed: number
+  markCurrentCountdownAsFinished: () => void
+  setSecondsPassed: (seconds: number) => void
+}
+
+const newCountdownFormValidationSchema = z.object({
+  task: z.string().min(1, 'Please type your task'),
+  minutesAmount: z.number().min(5).max(60),
+})
+
+type NewCycleFormData = z.infer<typeof newCountdownFormValidationSchema>
+
+// CONTEXT
+export const CountdownContext = createContext<ICountdownContext>(
+  {} as ICountdownContext,
+)
+
 export function Home() {
-  const [countdowns, setCountdowns] = useState<Countdown[]>([])
-  const [countdownId, setCountdownId] = useState<string | null>(null)
+  const [countdowns, setCountdowns] = useState<ICountdown[]>([])
+  const [activeCountdownId, setActiveCountdownId] = useState<string | null>(
+    null,
+  )
   const [amountSecondsPassed, setAmountSecondsPassed] = useState(0)
 
-  const { register, handleSubmit, watch, reset } = useForm<NewCycleFormData>({
+  const newCountdownForm = useForm<NewCycleFormData>({
     resolver: zodResolver(newCountdownFormValidationSchema),
     defaultValues: {
       task: '',
@@ -46,76 +56,34 @@ export function Home() {
     },
   })
 
+  const { handleSubmit, watch, reset } = newCountdownForm
+
+  const activeCountdown = countdowns.find(
+    (countdown) => countdown.id === activeCountdownId,
+  )
+
   const task = watch('task')
   const isSubmitDisabled = !task
 
-  const activeCountdown = countdowns.find(
-    (countdown) => countdown.id === countdownId,
-  )
-
-  // Get total of seconds typed user set
-  const totalSeconds = activeCountdown ? activeCountdown.minutesAmount * 60 : 0
-
-  // Amount of seconds passed after countdown is created
-  const currentSeconds = activeCountdown
-    ? totalSeconds - amountSecondsPassed
-    : 0
-
-  // Get amount of minutes and seconds left
-  const minutesLeft = Math.floor(currentSeconds / 60)
-  const secondsLeft = currentSeconds % 60
-
-  // Get amount of minutes and seconds left but with a 0 at the start if it doens't have one
-  const minutes = String(minutesLeft).padStart(2, '0')
-  const seconds = String(secondsLeft).padStart(2, '0')
-
-  // Run countdown
-  useEffect(() => {
-    let intervalId: number
-
-    if (activeCountdown) {
-      intervalId = setInterval(() => {
-        const differenceInSeconds = dayjs(new Date()).diff(
-          activeCountdown.startDate,
-          'seconds',
-        )
-
-        if (differenceInSeconds >= totalSeconds) {
-          setCountdowns((countdownList) =>
-            countdownList.map((countdown) => {
-              if (countdown.id === countdownId) {
-                return { ...countdown, finishedDate: new Date() }
-              }
-              return countdown
-            }),
-          )
-
-          setAmountSecondsPassed(totalSeconds)
-          clearInterval(intervalId)
-        } else {
-          setAmountSecondsPassed(differenceInSeconds)
+  const markCurrentCountdownAsFinished = () => {
+    setCountdowns((countdownList) =>
+      countdownList.map((countdown) => {
+        if (countdown.id === activeCountdownId) {
+          return { ...countdown, finishedDate: new Date() }
         }
-      }, 1000)
-    }
+        return countdown
+      }),
+    )
+  }
 
-    return () => {
-      clearInterval(intervalId)
-    }
-  }, [activeCountdown, totalSeconds, countdownId])
-
-  // update page title with timer
-  useEffect(() => {
-    if (activeCountdown) {
-      document.title = `${minutes}:${seconds}`
-    } else {
-      document.title = 'Pomodoro'
-    }
-  }, [minutes, seconds, activeCountdown])
+  const setSecondsPassed = (seconds: number) => {
+    setAmountSecondsPassed(seconds)
+  }
 
   const handleCreateNewCountdown = (data: NewCycleFormData) => {
     const id = String(new Date().getTime())
 
-    const newCountdown: Countdown = {
+    const newCountdown: ICountdown = {
       id,
       task: data.task,
       minutesAmount: data.minutesAmount,
@@ -123,7 +91,7 @@ export function Home() {
     }
 
     setCountdowns((state) => [...state, newCountdown])
-    setCountdownId(id)
+    setActiveCountdownId(id)
     setAmountSecondsPassed(0)
 
     // Will reset value to defaultValues inside of useForm hook
@@ -132,54 +100,35 @@ export function Home() {
 
   const handleStopCountdown = () => {
     const countdownListWithInterrupted = countdowns.map((countdown) => {
-      if (countdown.id === countdownId) {
+      if (countdown.id === activeCountdownId) {
         return { ...countdown, interruptedDate: new Date() }
       }
       return countdown
     })
 
-    setCountdownId(null)
+    setActiveCountdownId(null)
     setCountdowns(countdownListWithInterrupted)
   }
 
   return (
     <HomeContainer>
-      <FormContainer
-        id="timer"
-        onSubmit={handleSubmit(handleCreateNewCountdown)}
+      <CountdownContext.Provider
+        value={{
+          activeCountdown,
+          activeCountdownId,
+          markCurrentCountdownAsFinished,
+          amountSecondsPassed,
+          setSecondsPassed,
+        }}
       >
-        <label htmlFor="task">I&apos;m going to work on</label>
-        <InputStyled
-          type="text"
-          id="task"
-          placeholder="Give your task a name"
-          autoComplete="on"
-          disabled={!!activeCountdown}
-          {...register('task')}
-        />
+        <form id="timer" onSubmit={handleSubmit(handleCreateNewCountdown)}>
+          <FormProvider {...newCountdownForm}>
+            <NewCountdownForm />
+          </FormProvider>
+        </form>
 
-        <label htmlFor="minutesAmount">for</label>
-        <InputStyled
-          type="number"
-          id="minutesAmount"
-          placeholder="00"
-          step={5}
-          max={60}
-          min={5}
-          disabled={!!activeCountdown}
-          {...register('minutesAmount', { valueAsNumber: true })}
-        />
-
-        <span>minutes.</span>
-      </FormContainer>
-
-      <CountdownContainer>
-        <span>{minutes[0]}</span>
-        <span>{minutes[1]}</span>
-        <Separator>:</Separator>
-        <span>{seconds[0]}</span>
-        <span>{seconds[1]}</span>
-      </CountdownContainer>
+        <Countdown />
+      </CountdownContext.Provider>
 
       {activeCountdown ? (
         <InterruptButton type="button" onClick={handleStopCountdown}>
