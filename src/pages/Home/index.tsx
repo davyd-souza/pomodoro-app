@@ -30,6 +30,7 @@ interface Countdown {
   minutesAmount: number
   startDate: Date
   interruptedDate?: Date
+  finishedDate?: Date
 }
 
 export function Home() {
@@ -52,21 +53,64 @@ export function Home() {
     (countdown) => countdown.id === countdownId,
   )
 
+  // Get total of seconds typed user set
+  const totalSeconds = activeCountdown ? activeCountdown.minutesAmount * 60 : 0
+
+  // Amount of seconds passed after countdown is created
+  const currentSeconds = activeCountdown
+    ? totalSeconds - amountSecondsPassed
+    : 0
+
+  // Get amount of minutes and seconds left
+  const minutesLeft = Math.floor(currentSeconds / 60)
+  const secondsLeft = currentSeconds % 60
+
+  // Get amount of minutes and seconds left but with a 0 at the start if it doens't have one
+  const minutes = String(minutesLeft).padStart(2, '0')
+  const seconds = String(secondsLeft).padStart(2, '0')
+
+  // Run countdown
   useEffect(() => {
     let intervalId: number
 
     if (activeCountdown) {
       intervalId = setInterval(() => {
-        setAmountSecondsPassed((state) =>
-          dayjs(new Date()).diff(activeCountdown.startDate, 'seconds'),
+        const differenceInSeconds = dayjs(new Date()).diff(
+          activeCountdown.startDate,
+          'seconds',
         )
+
+        if (differenceInSeconds >= totalSeconds) {
+          setCountdowns((countdownList) =>
+            countdownList.map((countdown) => {
+              if (countdown.id === countdownId) {
+                return { ...countdown, finishedDate: new Date() }
+              }
+              return countdown
+            }),
+          )
+
+          setAmountSecondsPassed(totalSeconds)
+          clearInterval(intervalId)
+        } else {
+          setAmountSecondsPassed(differenceInSeconds)
+        }
       }, 1000)
     }
 
     return () => {
       clearInterval(intervalId)
     }
-  }, [activeCountdown])
+  }, [activeCountdown, totalSeconds, countdownId])
+
+  // update page title with timer
+  useEffect(() => {
+    if (activeCountdown) {
+      document.title = `${minutes}:${seconds}`
+    } else {
+      document.title = 'Pomodoro'
+    }
+  }, [minutes, seconds, activeCountdown])
 
   const handleCreateNewCountdown = (data: NewCycleFormData) => {
     const id = String(new Date().getTime())
@@ -97,31 +141,6 @@ export function Home() {
     setCountdownId(null)
     setCountdowns(countdownListWithInterrupted)
   }
-
-  // Get total of seconds typed user set
-  const totalSeconds = activeCountdown ? activeCountdown.minutesAmount * 60 : 0
-
-  // Amount of seconds passed after countdown is created
-  const currentSeconds = activeCountdown
-    ? totalSeconds - amountSecondsPassed
-    : 0
-
-  // Get amount of minutes and seconds left
-  const minutesLeft = Math.floor(currentSeconds / 60)
-  const secondsLeft = currentSeconds % 60
-
-  // Get amount of minutes and seconds left but with a 0 at the start if it doens't have one
-  const minutes = String(minutesLeft).padStart(2, '0')
-  const seconds = String(secondsLeft).padStart(2, '0')
-
-  // update page title with timer
-  useEffect(() => {
-    if (activeCountdown) {
-      document.title = `${minutes}:${seconds}`
-    } else {
-      document.title = 'Pomodoro'
-    }
-  }, [minutes, seconds, activeCountdown])
 
   return (
     <HomeContainer>
