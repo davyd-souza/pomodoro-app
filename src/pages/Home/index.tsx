@@ -29,6 +29,7 @@ interface Countdown {
   task: string
   minutesAmount: number
   startDate: Date
+  interruptedDate?: Date
 }
 
 export function Home() {
@@ -85,6 +86,18 @@ export function Home() {
     reset()
   }
 
+  const handleStopCountdown = () => {
+    const countdownListWithInterrupted = countdowns.map((countdown) => {
+      if (countdown.id === countdownId) {
+        return { ...countdown, interruptedDate: new Date() }
+      }
+      return countdown
+    })
+
+    setCountdownId(null)
+    setCountdowns(countdownListWithInterrupted)
+  }
+
   // Get total of seconds typed user set
   const totalSeconds = activeCountdown ? activeCountdown.minutesAmount * 60 : 0
 
@@ -105,6 +118,8 @@ export function Home() {
   useEffect(() => {
     if (activeCountdown) {
       document.title = `${minutes}:${seconds}`
+    } else {
+      document.title = 'Pomodoro'
     }
   }, [minutes, seconds, activeCountdown])
 
@@ -120,6 +135,7 @@ export function Home() {
           id="task"
           placeholder="Give your task a name"
           autoComplete="on"
+          disabled={!!activeCountdown}
           {...register('task')}
         />
 
@@ -131,6 +147,7 @@ export function Home() {
           step={5}
           max={60}
           min={5}
+          disabled={!!activeCountdown}
           {...register('minutesAmount', { valueAsNumber: true })}
         />
 
@@ -146,7 +163,7 @@ export function Home() {
       </CountdownContainer>
 
       {activeCountdown ? (
-        <InterruptButton type="button">
+        <InterruptButton type="button" onClick={handleStopCountdown}>
           Interrupt
           <HandPalm size={24} weight="bold" />
         </InterruptButton>
