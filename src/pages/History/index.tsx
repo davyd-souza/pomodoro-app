@@ -1,7 +1,16 @@
+// DEPENDENCY
+import { useContext } from 'react'
+import dayjs from 'dayjs'
+
 // STYLE
 import { HistoryContainer, HistoryList, Status, TableBase } from './styles'
 
+// CONTEXT
+import { CountdownContext } from '../../contexts/CountdownContext'
+
 export function History() {
+  const { countdowns } = useContext(CountdownContext)
+
   return (
     <HistoryContainer>
       <h2>My history</h2>
@@ -17,38 +26,32 @@ export function History() {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>Task</td>
-              <td>20 minutes</td>
-              <td>2 months ago</td>
-              <td>
-                <Status statusColor="finished">Finished</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Task</td>
-              <td>20 minutes</td>
-              <td>2 months ago</td>
-              <td>
-                <Status statusColor="progress">In Progress</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Task</td>
-              <td>20 minutes</td>
-              <td>2 months ago</td>
-              <td>
-                <Status statusColor="stopped">Stopped</Status>
-              </td>
-            </tr>
-            <tr>
-              <td>Task</td>
-              <td>20 minutes</td>
-              <td>2 months ago</td>
-              <td>
-                <Status statusColor="finished">Finished</Status>
-              </td>
-            </tr>
+            {countdowns.map((countdown) => (
+              <tr key={countdown.id}>
+                <td>{countdown.task}</td>
+                <td>{countdown.minutesAmount} minutes</td>
+                <td
+                  title={dayjs(countdown.startDate).format(
+                    'MMMM DD[,] YYYY [at] hh[:]mmA',
+                  )}
+                >
+                  {dayjs(countdown.startDate).fromNow()}
+                </td>
+                <td>
+                  {countdown.finishedDate && (
+                    <Status statusColor="finished">Finished</Status>
+                  )}
+
+                  {countdown.interruptedDate && (
+                    <Status statusColor="interrupted">Interrupted</Status>
+                  )}
+
+                  {!countdown.finishedDate && !countdown.interruptedDate && (
+                    <Status statusColor="progress">In Progress</Status>
+                  )}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </TableBase>
       </HistoryList>

@@ -63,7 +63,7 @@ export const TableBase = styled.table`
 const STATUS_COLORS = {
   finished: 'green',
   progress: 'amber',
-  stopped: 'red',
+  interrupted: 'red',
 } as const
 
 interface StatusProps {
