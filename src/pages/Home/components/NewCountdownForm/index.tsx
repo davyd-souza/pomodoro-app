@@ -1,12 +1,12 @@
 // DEPENDENCY
 import { useContext } from 'react'
+import { useFormContext } from 'react-hook-form'
 
 // STYLE
 import { FormContainer, InputStyled } from './styles'
 
 // CONTEXT
-import { CountdownContext } from '../..'
-import { useFormContext } from 'react-hook-form'
+import { CountdownContext } from '../../../../contexts/CountdownContext'
 
 export function NewCountdownForm() {
   const { activeCountdown } = useContext(CountdownContext)

@@ -6,7 +6,7 @@ import { useContext, useEffect } from 'react'
 import { CountdownContainer, Separator } from './styles'
 
 // CONTEXT
-import { CountdownContext } from '../..'
+import { CountdownContext } from '../../../../contexts/CountdownContext'
 
 export function Countdown() {
   const {
