@@ -74,7 +74,7 @@ export function CountdownContextProvider({
       startDate: new Date(),
     }
 
-    setCountdowns((state) => [...state, newCountdown])
+    setCountdowns((state) => [newCountdown, ...state])
     setActiveCountdownId(id)
     setAmountSecondsPassed(0)
   }
