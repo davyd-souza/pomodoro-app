@@ -34,14 +34,21 @@ export function Home() {
     },
   })
 
-  const { handleSubmit, watch /* reset */ } = newCountdownForm
+  const { handleSubmit, watch, reset } = newCountdownForm
 
   const task = watch('task')
   const isSubmitDisabled = !task
 
+  const handleCreateNewCountdown = (data: NewCycleFormData) => {
+    createNewCountdown(data)
+
+    // Will reset value to defaultValues inside of useForm hook
+    reset()
+  }
+
   return (
     <HomeContainer>
-      <form id="timer" onSubmit={handleSubmit(createNewCountdown)}>
+      <form id="timer" onSubmit={handleSubmit(handleCreateNewCountdown)}>
         <FormProvider {...newCountdownForm}>
           <NewCountdownForm />
         </FormProvider>

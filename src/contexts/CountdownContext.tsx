@@ -21,6 +21,7 @@ interface ICountdown {
 }
 
 interface ICountdownContext {
+  countdowns: ICountdown[]
   activeCountdown: ICountdown | undefined
   activeCountdownId: string | null
   amountSecondsPassed: number
@@ -76,9 +77,6 @@ export function CountdownContextProvider({
     setCountdowns((state) => [...state, newCountdown])
     setActiveCountdownId(id)
     setAmountSecondsPassed(0)
-
-    // Will reset value to defaultValues inside of useForm hook
-    // reset()
   }
 
   const interruptActiveCountdown = () => {
@@ -96,6 +94,7 @@ export function CountdownContextProvider({
   return (
     <CountdownContext.Provider
       value={{
+        countdowns,
         activeCountdown,
         activeCountdownId,
         markCurrentCountdownAsFinished,
