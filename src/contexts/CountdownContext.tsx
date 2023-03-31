@@ -1,6 +1,14 @@
 // DEPENDENCY
 import { createContext, ReactNode, useReducer, useState } from 'react'
 
+// REDUCER
+import { countdownReducer, ICountdown } from '../reducers/countdowns/reducer'
+import {
+  addNewCycleAction,
+  interruptCountdownAction,
+  markCurrentCountdownAsFinishedAction,
+} from '../reducers/countdowns/actions'
+
 // TYPE
 interface CountdownContextProviderProps {
   children: ReactNode
@@ -9,15 +17,6 @@ interface CountdownContextProviderProps {
 interface CreateNewCountdownData {
   task: string
   minutesAmount: number
-}
-
-interface ICountdown {
-  id: string
-  task: string
-  minutesAmount: number
-  startDate: Date
-  interruptedDate?: Date
-  finishedDate?: Date
 }
 
 interface ICountdownContext {
@@ -31,11 +30,6 @@ interface ICountdownContext {
   interruptActiveCountdown: () => void
 }
 
-interface CountdownsState {
-  countdowns: ICountdown[]
-  activeCountdownId: string | null
-}
-
 // CONTEXT
 export const CountdownContext = createContext<ICountdownContext>(
   {} as ICountdownContext,
@@ -44,49 +38,10 @@ export const CountdownContext = createContext<ICountdownContext>(
 export function CountdownContextProvider({
   children,
 }: CountdownContextProviderProps) {
-  const [countdownsState, dispatch] = useReducer(
-    (state: CountdownsState, action: any) => {
-      switch (action.type) {
-        case 'ADD_NEW_COUNTDOWN':
-          return {
-            ...state,
-            countdowns: [action.payload.newCountdown, ...state.countdowns],
-            activeCountdownId: action.payload.newCountdown.id,
-          }
-
-        case 'INTERRUPT_COUNTDOWN':
-          return {
-            ...state,
-            countdowns: state.countdowns.map((countdown) => {
-              if (countdown.id === state.activeCountdownId) {
-                return { ...countdown, interruptedDate: new Date() }
-              }
-              return countdown
-            }),
-            activeCountdownId: null,
-          }
-
-        case 'MARK_CURRENT_COUNTDOWN_AS_FINISHED':
-          return {
-            ...state,
-            countdowns: state.countdowns.map((countdown) => {
-              if (countdown.id === state.activeCountdownId) {
-                return { ...countdown, finishedDate: new Date() }
-              }
-              return countdown
-            }),
-            activeCountdownId: null,
-          }
-
-        default:
-          return state
-      }
-    },
-    {
-      countdowns: [],
-      activeCountdownId: null,
-    },
-  )
+  const [countdownsState, dispatch] = useReducer(countdownReducer, {
+    countdowns: [],
+    activeCountdownId: null,
+  })
 
   const [amountSecondsPassed, setAmountSecondsPassed] = useState(0)
 
@@ -97,12 +52,7 @@ export function CountdownContextProvider({
   )
 
   const markCurrentCountdownAsFinished = () => {
-    dispatch({
-      type: 'MARK_CURRENT_COUNTDOWN_AS_FINISHED',
-      payload: {
-        activeCountdownId,
-      },
-    })
+    dispatch(markCurrentCountdownAsFinishedAction())
   }
 
   const setSecondsPassed = (seconds: number) => {
@@ -119,20 +69,12 @@ export function CountdownContextProvider({
       startDate: new Date(),
     }
 
-    dispatch({
-      type: 'ADD_NEW_COUNTDOWN',
-      payload: {
-        newCountdown,
-      },
-    })
+    dispatch(addNewCycleAction(newCountdown))
     setAmountSecondsPassed(0)
   }
 
   const interruptActiveCountdown = () => {
-    dispatch({
-      type: 'INTERRUPT_COUNTDOWN',
-      payload: {},
-    })
+    dispatch(interruptCountdownAction())
   }
 
   return (
