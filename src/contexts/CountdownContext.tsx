@@ -1,5 +1,5 @@
 // DEPENDENCY
-import { createContext, ReactNode, useState } from 'react'
+import { createContext, ReactNode, useReducer, useState } from 'react'
 
 // TYPE
 interface CountdownContextProviderProps {
@@ -31,6 +31,11 @@ interface ICountdownContext {
   interruptActiveCountdown: () => void
 }
 
+interface CountdownsState {
+  countdowns: ICountdown[]
+  activeCountdownId: string | null
+}
+
 // CONTEXT
 export const CountdownContext = createContext<ICountdownContext>(
   {} as ICountdownContext,
@@ -39,25 +44,65 @@ export const CountdownContext = createContext<ICountdownContext>(
 export function CountdownContextProvider({
   children,
 }: CountdownContextProviderProps) {
-  const [countdowns, setCountdowns] = useState<ICountdown[]>([])
-  const [activeCountdownId, setActiveCountdownId] = useState<string | null>(
-    null,
+  const [countdownsState, dispatch] = useReducer(
+    (state: CountdownsState, action: any) => {
+      switch (action.type) {
+        case 'ADD_NEW_COUNTDOWN':
+          return {
+            ...state,
+            countdowns: [action.payload.newCountdown, ...state.countdowns],
+            activeCountdownId: action.payload.newCountdown.id,
+          }
+
+        case 'INTERRUPT_COUNTDOWN':
+          return {
+            ...state,
+            countdowns: state.countdowns.map((countdown) => {
+              if (countdown.id === state.activeCountdownId) {
+                return { ...countdown, interruptedDate: new Date() }
+              }
+              return countdown
+            }),
+            activeCountdownId: null,
+          }
+
+        case 'MARK_CURRENT_COUNTDOWN_AS_FINISHED':
+          return {
+            ...state,
+            countdowns: state.countdowns.map((countdown) => {
+              if (countdown.id === state.activeCountdownId) {
+                return { ...countdown, finishedDate: new Date() }
+              }
+              return countdown
+            }),
+            activeCountdownId: null,
+          }
+
+        default:
+          return state
+      }
+    },
+    {
+      countdowns: [],
+      activeCountdownId: null,
+    },
   )
+
   const [amountSecondsPassed, setAmountSecondsPassed] = useState(0)
+
+  const { countdowns, activeCountdownId } = countdownsState
 
   const activeCountdown = countdowns.find(
     (countdown) => countdown.id === activeCountdownId,
   )
 
   const markCurrentCountdownAsFinished = () => {
-    setCountdowns((countdownList) =>
-      countdownList.map((countdown) => {
-        if (countdown.id === activeCountdownId) {
-          return { ...countdown, finishedDate: new Date() }
-        }
-        return countdown
-      }),
-    )
+    dispatch({
+      type: 'MARK_CURRENT_COUNTDOWN_AS_FINISHED',
+      payload: {
+        activeCountdownId,
+      },
+    })
   }
 
   const setSecondsPassed = (seconds: number) => {
@@ -74,21 +119,20 @@ export function CountdownContextProvider({
       startDate: new Date(),
     }
 
-    setCountdowns((state) => [newCountdown, ...state])
-    setActiveCountdownId(id)
+    dispatch({
+      type: 'ADD_NEW_COUNTDOWN',
+      payload: {
+        newCountdown,
+      },
+    })
     setAmountSecondsPassed(0)
   }
 
   const interruptActiveCountdown = () => {
-    const countdownListWithInterrupted = countdowns.map((countdown) => {
-      if (countdown.id === activeCountdownId) {
-        return { ...countdown, interruptedDate: new Date() }
-      }
-      return countdown
+    dispatch({
+      type: 'INTERRUPT_COUNTDOWN',
+      payload: {},
     })
-
-    setActiveCountdownId(null)
-    setCountdowns(countdownListWithInterrupted)
   }
 
   return (
