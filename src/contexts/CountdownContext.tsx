@@ -1,5 +1,12 @@
 // DEPENDENCY
-import { createContext, ReactNode, useReducer, useState } from 'react'
+import {
+  createContext,
+  ReactNode,
+  useEffect,
+  useReducer,
+  useState,
+} from 'react'
+import dayjs from 'dayjs'
 
 // REDUCER
 import { countdownReducer, ICountdown } from '../reducers/countdowns/reducer'
@@ -38,18 +45,48 @@ export const CountdownContext = createContext<ICountdownContext>(
 export function CountdownContextProvider({
   children,
 }: CountdownContextProviderProps) {
-  const [countdownsState, dispatch] = useReducer(countdownReducer, {
-    countdowns: [],
-    activeCountdownId: null,
-  })
+  const [countdownsState, dispatch] = useReducer(
+    countdownReducer,
+    {
+      countdowns: [],
+      activeCountdownId: null,
+    },
+    (initialState) => {
+      const storedStateAsJSON = localStorage.getItem(
+        '@pomodoro-app:countdowns-state-1.0.0',
+      )
 
-  const [amountSecondsPassed, setAmountSecondsPassed] = useState(0)
+      if (storedStateAsJSON) {
+        return JSON.parse(storedStateAsJSON)
+      }
+
+      return initialState
+    },
+  )
 
   const { countdowns, activeCountdownId } = countdownsState
-
   const activeCountdown = countdowns.find(
     (countdown) => countdown.id === activeCountdownId,
   )
+
+  const [amountSecondsPassed, setAmountSecondsPassed] = useState(() => {
+    if (activeCountdown) {
+      const differenceInSeconds = dayjs(new Date()).diff(
+        new Date(activeCountdown.startDate),
+        'seconds',
+      )
+
+      return differenceInSeconds
+    }
+
+    return 0
+  })
+
+  useEffect(() => {
+    const stateJSON = JSON.stringify(countdownsState)
+
+    localStorage.setItem('@pomodoro-app:countdowns-state-1.0.0', stateJSON)
+  }, [countdownsState])
 
   const markCurrentCountdownAsFinished = () => {
     dispatch(markCurrentCountdownAsFinishedAction())

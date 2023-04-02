@@ -39,7 +39,7 @@ export function Countdown() {
     if (activeCountdown) {
       intervalId = setInterval(() => {
         const differenceInSeconds = dayjs(new Date()).diff(
-          activeCountdown.startDate,
+          new Date(activeCountdown.startDate),
           'seconds',
         )
 
