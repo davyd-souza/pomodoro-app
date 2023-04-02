@@ -1,3 +1,6 @@
+// DEPENDENCY
+import { produce } from 'immer'
+
 // REDUCER
 import { ActionTypes } from './actions'
 
@@ -19,35 +22,40 @@ interface CountdownsState {
 export function countdownReducer(state: CountdownsState, action: any) {
   switch (action.type) {
     case ActionTypes.ADD_NEW_COUNTDOWN:
-      return {
-        ...state,
-        countdowns: [action.payload.newCountdown, ...state.countdowns],
-        activeCountdownId: action.payload.newCountdown.id,
+      return produce(state, (draft) => {
+        draft.countdowns.push(action.payload.newCountdown)
+        draft.activeCountdownId = action.payload.newCountdown.id
+      })
+
+    case ActionTypes.INTERRUPT_COUNTDOWN: {
+      const currentCountdownIndex = state.countdowns.findIndex(
+        (countdown) => countdown.id === state.activeCountdownId,
+      )
+
+      if (currentCountdownIndex < 0) {
+        return state
       }
 
-    case ActionTypes.INTERRUPT_COUNTDOWN:
-      return {
-        ...state,
-        countdowns: state.countdowns.map((countdown) => {
-          if (countdown.id === state.activeCountdownId) {
-            return { ...countdown, interruptedDate: new Date() }
-          }
-          return countdown
-        }),
-        activeCountdownId: null,
+      return produce(state, (draft) => {
+        draft.activeCountdownId = null
+        draft.countdowns[currentCountdownIndex].interruptedDate = new Date()
+      })
+    }
+
+    case ActionTypes.MARK_CURRENT_COUNTDOWN_AS_FINISHED: {
+      const currentCountdownIndex = state.countdowns.findIndex(
+        (countdown) => countdown.id === state.activeCountdownId,
+      )
+
+      if (currentCountdownIndex < 0) {
+        return state
       }
 
-    case ActionTypes.MARK_CURRENT_COUNTDOWN_AS_FINISHED:
-      return {
-        ...state,
-        countdowns: state.countdowns.map((countdown) => {
-          if (countdown.id === state.activeCountdownId) {
-            return { ...countdown, finishedDate: new Date() }
-          }
-          return countdown
-        }),
-        activeCountdownId: null,
-      }
+      return produce(state, (draft) => {
+        draft.activeCountdownId = null
+        draft.countdowns[currentCountdownIndex].finishedDate = new Date()
+      })
+    }
 
     default:
       return state
