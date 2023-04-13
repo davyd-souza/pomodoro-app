@@ -9,8 +9,8 @@
 <p align="center">
   <a href="#tech">Technologies</a> •
   <a href="#objective">Objective</a> •
+	<a href="#ideas">Improvement Ideas</a> •
   <a href="#use">How to Use</a> •
-  <a href="#ideas">Improvement Ideas</a> •
   <a href="#author">Author</a>
 </p>
 
